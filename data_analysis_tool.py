@@ -8,16 +8,13 @@ possible_functions = ["Describe data", "Correlate data", "Graph Scatter Plot"]
 #messages for correlation and describe function.
 select_message = "\nInput any (including multiple) of the following data"
 
-
-def main():
-    print("Welcome to the data analysis tool. To get started please input the name of the file "
-        "you wish to use.\nNote: Please ensure the file you wish to use is in the same folder as " 
-        "this script.\n")
-
-    data = find_file()
-    make_action(data)
-
 def find_file():
+    """ 
+    Asks for file name, opening and reading its contents
+
+    Return:
+        data (pd.DataFrame) Dataframe of file contents
+    """
     while True:
         file_name = input("File name: ")
         try:
@@ -47,6 +44,12 @@ def find_file():
 
 
 def make_action(data):
+    """ 
+    Asks user what action they wish to make, then running the corresponding function
+
+    Parameter:
+        data (pd.DataFrame) Dataframe of file contents
+    """
     #make variable for only numeric data for numeric only functions
     numeric_data = data.select_dtypes(include="number")
     #create counter and run for loop to make list of functions
@@ -75,6 +78,16 @@ def make_action(data):
             print("Invalid action. Please input the corresponding number of your action.")
 
 def find_selected_data(available):
+    """ 
+    Finds data from chosen variables in file dataframe
+
+    Parameter:
+        available (list) List of numerical variable names
+    
+    Returns:
+        available: if all variables are selected
+        selected (list) all selected variable names
+    """
     #create temporary dictionary with index being lowercase column name for lookup, 
     #and element being column name with correct capitalization
     column_dict = {i.lower(): i for i in available}
@@ -87,7 +100,6 @@ def find_selected_data(available):
         #remove all commas and format selected data
         valid_data = selected_data.replace(',', "")
         selected_data_list = valid_data.split()
-        print(selected_data_list)
 
         #check is 'all is selected'
         if selected_data.strip().lower() == "all":
@@ -107,6 +119,15 @@ def find_selected_data(available):
             return selected
 
 def describe_data(numeric_data):
+    """ 
+    Sets data into a format that can be passed analysis functions, printing the results
+
+    Parameter:
+        numeric_data (Dataframe) All number based variables in the chosen file
+    
+    Returns:
+        Printed message of eval_mean, eval_iqr and eval_range
+    """
     #gets headings of all numeric data
     available_data = list(numeric_data.columns)
 
@@ -123,6 +144,16 @@ def describe_data(numeric_data):
     print(mean_message, iqr_message, range_message)
 
 def eval_mean(selected, described):
+    """ 
+    Makes printable mean data information
+
+    Parameter:
+        selected (list) Selected valiable names to be analysed
+        described (pd.DataFrame) Statistical summary of file's numeric data
+    
+    Returns:
+        Mean data string
+    """
     mean_list = []
 
     for column in selected:
@@ -156,6 +187,16 @@ Mean:
 """
 
 def eval_iqr(selected, described):
+    """ 
+    Makes printable inter-quartile range data information
+
+    Parameter:
+        selected (list) Selected valiable names to be analysed
+        described (pd.DataFrame) Statistical summary of file's numeric data
+    
+    Returns:
+        Inter-quartile range data string
+    """
     lower_q_list = []
     upper_q_list = []
     iqr_list = []
@@ -191,6 +232,16 @@ Inter-quartile range:
 """
 
 def eval_range(selected, described):
+    """ 
+    Makes printable range data information
+
+    Parameter:
+        selected (list) Selected valiable names to be analysed
+        described (pd.DataFrame) Statistical summary of file's numeric data
+    
+    Returns:
+        Range data string
+    """
     min_list = []
     max_list = []
     range_list = []
@@ -227,6 +278,15 @@ Range:
 
 
 def correlate_data(numeric_data):
+    """ 
+    Makes printable correlated data information
+
+    Parameter:
+        numeric_data (Dataframe) All number based variables in the chosen file
+    
+    Returns:
+        Correlation data string
+    """
     # gets headings of all numeric data
     available_data = list(numeric_data.columns)
     # get numeric data
@@ -260,6 +320,16 @@ Lowest Correlation:
     print(correlation_message)
 
 def get_graph_variables(available, var_type):
+    """ 
+    Asks user what variables they want to be used for a scatter plot
+
+    Parameter:
+        available (list) List of numerical variable names
+        var_type (str) Axes the variable will be on (x/y)
+    
+    Returns:
+        axis_data (pd.DataFrame) relevant data for plotting
+    """
     #see find_selected_data()
     column_dict = {i.lower(): i for i in available}
     while True:
@@ -274,7 +344,19 @@ def get_graph_variables(available, var_type):
             return axis_data
 
 def get_regression_line(x, y):
-    """Asks user if they want a regression line and if so, calculate slope and intercept"""
+    """ 
+    Asks user if they want a regression line and if so, begins fitting calculations
+
+    Parameter:
+        x (np.ndarray) Array of x values for plotting
+        y (np.ndarray) Array of y values for plotting
+    
+    Returns:
+        regression_line: Status of whether there will be a regression line (True/False)
+        xs: sorted array of x values 
+        y_fitted: y values of regression line
+    """
+
     while True:
         try:
             regression_status = input("Would you like a regression line? (y/n) ")
@@ -299,7 +381,17 @@ def get_regression_line(x, y):
             print("Invalid regression line degree type. Please try again and ensure the degree is an integer.")
 
 def get_fitted_values(xs, coefficients):
-    """Use x values and coefficients to calculate the fitted y values for regression line"""
+    """ 
+    Calculates y_fitted values for regression line based off given coefficients
+
+    Parameter:
+        xs (np.ndarray) sorted x values for plotting
+        coefficients (np.ndarray) Coefficients based off regression line degree
+    
+    Returns:
+        xs: sorted x values 
+        y_fitted: y values of regression line
+    """
     #makes initial array that will be added to over each degree of the polynomial
     fitted_y = np.zeros(len(xs))
     exponent = len(coefficients) - 1
@@ -314,6 +406,15 @@ def get_fitted_values(xs, coefficients):
 
 
 def graph_scatter_plot(numeric_data):
+    """ 
+    Graphs scatter plot using the numeric data selected
+
+    Parameter:
+        numeric_data (Dataframe)
+    
+    Returns:
+        Matplotlib scatter plot
+    """
     # gets headings of all numeric data
     available_data = list(numeric_data.columns)
     
@@ -346,8 +447,14 @@ def graph_scatter_plot(numeric_data):
     axes.set_ylabel(y_var) 
     plt.show()
 
+def main():
+    """main function of program, welcoming user and describing the choose file steps"""
 
-#CALCULATE Y_FITTED
-#PLOT
+    print("Welcome to the data analysis tool. To get started please input the name of the file "
+        "you wish to use.\nNote: Please ensure the file you wish to use is in the same folder as " 
+        "this script.\n")
+
+    data = find_file()
+    make_action(data)
 
 main()
